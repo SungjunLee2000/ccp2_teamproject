@@ -71,6 +71,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         // 플레이어 데이터 초기화
         InitPlayer();
 
+        // 아이템 데이터 초기화
+        ItemResource.Instance.InitItemData();
+
+        // 보상 초기화
+        RewardResource.Instance.InitRewardData();
+
         // 경험치 데이터 설정
         expResource.SetWaveLevel(waveData.WaveLevel);
 
@@ -116,6 +122,8 @@ public class GameManager : MonoBehaviourPunCallbacks
             PlayerData playerData = playerDatas[i];
             if (playerData.IsPlaying)
             {
+                playableChrList[i].SetActive(true);
+
                 // 플레이어 오브젝트 목록에 추가
                 gameData.AddPlayableChr(playableChrList[i]);
             }
@@ -172,8 +180,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
                 waveData.RemainTime -= time;
 
-                int prevTime = Mathf.FloorToInt(waveData.RemainTime + time);
-                int curTime = Mathf.FloorToInt(waveData.RemainTime);
+                float prevTime = (float)System.Math.Round(waveData.RemainTime + time, 1);
+                float curTime = (float)System.Math.Round(waveData.RemainTime, 1);
 
                 if (prevTime != curTime)
                 {
@@ -193,7 +201,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void UpdateWaveTime(int time)
+    private void UpdateWaveTime(float time)
     {
         waveData.RemainTime = time;
     }

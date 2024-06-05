@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviourPun, IControlState
     [Header("참조 스크립트")]
     [SerializeField] private Player player;
     [SerializeField] private CameraManager cameraManager;
+    [SerializeField] private SkillCoolTimeUI skillUI;
 
     // 이동 관련 변수
     private Rigidbody2D rigid;
@@ -28,13 +29,6 @@ public class PlayerController : MonoBehaviourPun, IControlState
     {
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-
-        if (playerData.IsPlaying == false)
-        {
-            Destroy(gameObject);
-
-            return;
-        }
 
         // 조종 권한 설정
         Photon.Realtime.Player owner = playerData.Player;
@@ -141,8 +135,6 @@ public class PlayerController : MonoBehaviourPun, IControlState
 
     private void CooldownSkills()
     {
-        float time = Time.deltaTime;
-
         if (attackCooldown > 0)
         {
             attackCooldown -= Time.deltaTime;
@@ -150,8 +142,23 @@ public class PlayerController : MonoBehaviourPun, IControlState
 
         if (skillCooldown > 0)
         {
+            float prevTime = (float)System.Math.Round(skillCooldown, 1);
+
             skillCooldown -= Time.deltaTime;
+
+            float curTime = (float)System.Math.Round(skillCooldown, 1);
+            if (prevTime != curTime)
+            {
+                // 초 단위로 시간이 변했다면 스킬 쿨타임 변경
+                photonView.RPC(nameof(UpdateSkillTimer), playerData.Player, curTime);
+            }
         }
+    }
+
+    [PunRPC]
+    private void UpdateSkillTimer(float time)
+    {
+        skillUI.UpdateTime(time);
     }
 
     private void OnEnable()
